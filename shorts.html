@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Shorts Player</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        #shorts-container {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+        }
+        .short {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #170707;
+            scroll-snap-align: start;
+        }
+        .video-container {
+            width: 25vw;
+            height: 95vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px !important;
+            max-width: 100vw;
+            max-height: 100vh;
+            background-color: aqua;
+        }
+        .short-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-family: Arial, sans-serif;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div id="shorts-container"></div>
+
+    <script>
+        const shortsContainer = document.getElementById('shorts-container');
+
+        const shorts = [
+            { videoId: 'rP7bi7E89ZQ', title: 'Educational Short 1' },
+            { videoId: 'S_PHAjDHKHY', title: 'Educational Short 2' },
+            { videoId: 'LGazWbcp4vo', title: 'Educational Short 3' },
+            { videoId: '_G0sZh8n-Ns', title: 'Educational Short 3' },
+            { videoId: 'sl7cEpeVucQ', title: 'Educational Short 3' },
+        ];
+
+        function createShort(short) {
+            const shortElement = document.createElement('div');
+            shortElement.className = 'short';
+
+            const videoContainer = document.createElement('div');
+            videoContainer.className = 'video-container';
+
+           
+
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://www.youtube.com/embed/${short.videoId}?autoplay=0&controls=1&loop=1&rel=0&enablejsapi=1`;
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            iframe.allowFullscreen = true;
+
+            const info = document.createElement('div');
+            info.className = 'short-info';
+            info.textContent = short.title;
+
+            videoContainer.appendChild(iframe);
+            shortElement.appendChild(videoContainer);
+            shortElement.appendChild(info);
+            return shortElement;
+        }
+
+        function loadShorts() {
+            shorts.forEach((short) => {
+                shortsContainer.appendChild(createShort(short));
+            });
+        }
+
+        function handleIntersection(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const iframe = entry.target.querySelector('iframe');
+                    iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                } else {
+                    const iframe = entry.target.querySelector('iframe');
+                    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                }
+            });
+        }
+
+        loadShorts();
+
+        const observer = new IntersectionObserver(handleIntersection, {
+            root: null,
+            threshold: 0.5
+        });
+
+        document.querySelectorAll('.short').forEach(short => {
+            observer.observe(short);
+        });
+
+        shortsContainer.addEventListener('scroll', () => {
+            const shorts = document.querySelectorAll('.short');
+            shorts.forEach(short => {
+                const rect = short.getBoundingClientRect();
+                if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+                    const iframe = short.querySelector('iframe');
+                    iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                } else {
+                    const iframe = short.querySelector('iframe');
+                    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
