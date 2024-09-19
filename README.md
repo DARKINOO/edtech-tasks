@@ -1,6 +1,6 @@
 ﻿# edtech-tasks
 # Integrate Shorts Feature
-# Integrate PowerBi dashboard to webpage
+# Integrate dashboard to webpage
 # Creating routes in express
 # Responsive UI
 # api handling
